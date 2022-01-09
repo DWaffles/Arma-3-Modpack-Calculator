@@ -1,0 +1,118 @@
+﻿using AngleSharp;
+
+namespace ModpackCalculator
+{
+    internal partial class ModManager
+    {
+        public async Task<int> ReadFromCurrentHTMLAsync(string path)
+        {
+            var currentMods = await ReadFromHTMLAsync(path, ModpackStatus.CurrentMod);
+            AddReadMods(currentMods, ModpackStatus.CurrentMod);
+            return currentMods.Count;
+        }
+        public async Task<int> ReadFromPreviousHTMLAsync(string path)
+        {
+            var previousMods = await ReadFromHTMLAsync(path, ModpackStatus.PreviousMod);
+            AddReadMods(previousMods, ModpackStatus.PreviousMod);
+            return previousMods.Count;
+        }
+        private async Task<List<ModModel>> ReadFromHTMLAsync(string path, ModpackStatus status)
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            var context = BrowsingContext.New(config);
+            var document = await context.OpenAsync(req => req.Content(File.ReadAllText(path)));
+
+            var table = document.QuerySelectorAll(".mod-list > table:nth-child(1) > tbody:nth-child(1)");
+
+            if (table.Any())
+            {
+                List<ModModel> readMods = new();
+                foreach (var item in table.ElementAt(0).Children)
+                {
+                    string name = item.Children.ElementAt(0).TextContent;
+                    string modLink = item.Children.ElementAt(2).TextContent;
+
+                    ModModel mod = new()
+                    {
+                        ModName = name,
+                        ModLink = RegexHelper.StripSpecialCharacters(modLink).Trim(),
+                        ModId = RegexHelper.GetModId(modLink) ?? 0,
+                        Status = status,
+                    };
+                    readMods.Add(mod);
+                }
+                document.Close();
+                return readMods;
+            }
+            document.Close();
+            return new List<ModModel>();
+        }
+        public int ReadFromInstalled(string path)
+        {
+            List<ModModel> installedMods = new();
+
+            DirectoryInfo armaDir = new(GetWorkshopPath(path));
+
+            if (!armaDir.Exists)
+                throw new DirectoryNotFoundException($"{GetWorkshopPath(path)} cannot be found.");
+
+            foreach (var dir in armaDir.GetDirectories())
+            {
+                string filePath = dir.FullName + Path.DirectorySeparatorChar + "meta.cpp";
+                if (File.Exists(filePath))
+                {
+                    using var reader = new StreamReader(filePath);
+                    reader.ReadLine(); // disregarding first line
+
+                    var returnedId = RegexHelper.GetModId(reader.ReadLine() ?? String.Empty); //get second line that has publishedid
+                    if (returnedId != null)
+                    {
+                        string name = reader.ReadLine() ?? string.Empty;
+                        if (name.StartsWith("name = ") && name.EndsWith("\";"))
+                        {
+                            name = name.Remove(name.Length - 2).Substring(8);
+                        }
+                        ModModel mod = new()
+                        {
+                            ModName = name,
+                            ModId = returnedId.Value,
+                            Status = ModpackStatus.Installed,
+                            Directory = dir,
+                        };
+                        installedMods.Add(mod);
+                    }
+                }
+            }
+            AddReadMods(installedMods, ModpackStatus.Installed);
+            return installedMods.Count;
+        }
+        public async Task<ModModel> ScrapeModDependenciesAsync(ModModel scrapeMod)
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            var context = BrowsingContext.New(config);
+            var document = await context.OpenAsync(scrapeMod.ModLink);
+
+            Console.WriteLine(scrapeMod.ModLink);
+
+            var workshopTitle = document.QuerySelectorAll(".workshopItemTitle");
+            var requiredItems = document.QuerySelectorAll("#RequiredItems"); // https://stackoverflow.com/questions/32427674/how-to-extract-data-from-website-using-anglesharp-linq
+
+            if (requiredItems.Any())
+            {
+                var page = requiredItems.ElementAt(0);
+                foreach (var child in page.Children)
+                {
+                    ModModel modDependency = new()
+                    {
+                        ModLink = child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty,
+                        ModName = RegexHelper.StripSpecialCharacters(child.TextContent),
+                        ModId = RegexHelper.GetModId(child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty) ?? 0,
+                        Status = ModpackStatus.Dependency
+                    };
+                    scrapeMod.Dependencies.Add(modDependency);
+                }
+            }
+            return scrapeMod;
+        }
+    }
+}
