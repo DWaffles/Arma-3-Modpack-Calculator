@@ -4,7 +4,7 @@
     /// This enum represents a mod's status in regards to the modpack and current installation status.
     /// </summary>
     [Flags]
-    internal enum ModpackStatus
+    internal enum ModStatus
     {
         /// <summary>
         /// Empty default value.

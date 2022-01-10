@@ -1,23 +1,30 @@
-﻿namespace ModpackCalculator
+﻿using System.Collections.ObjectModel;
+
+namespace ModpackCalculator
 {
     internal partial class ModManager
     {
         private List<ModModel> Mods { get; set; } = new();
-        //private List<ModModel> InstalledMods { get; set; } = new();
-        //private List<ModModel> CurrentMods { get; set; } = new();
-        //private List<ModModel> PreviousMods { get; set; } = new();
-        public async Task PopulateDependenciesAsync()
+        public ReadOnlyCollection<ModModel> GetMods()
         {
-            var list = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod));
+            return Mods.AsReadOnly();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>A named tuple, the first value being the count of mods whose dependencies were populated, and the second value being the count of dependencies.</returns>
+        public async Task<(int ModsPopulated, int Dependencies)> PopulateDependenciesAsync()
+        {
+            var list = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod));
 
             var tasks = list.Select(async mod =>
             {
                 var response = await ScrapeModDependenciesAsync(mod);
             });
             await Task.WhenAll(tasks);
+            return (list.Count(), list.Sum(x => x.Dependencies.Count));
         }
-
-        private void AddReadMods(IEnumerable<ModModel> mods, ModpackStatus status)
+        private void AddReadMods(IEnumerable<ModModel> mods, ModStatus status)
         {
             foreach (var mod in mods)
             {
@@ -48,59 +55,6 @@
         private string GetWorkshopPath(string path)
         {
             return Path.Combine(path, "!Workshop");
-        }
-        public void PrintModOverview()
-        {
-            Console.WriteLine($"{Mods.Count} total mods in data (excluding dependencies). {Mods.Sum(x => x.Dependencies.Count())} dependencies counted.");
-            Console.WriteLine($"Current Mods: {Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod)).Count()}");
-            Console.WriteLine($"Previous Mods: {Mods.Where(x => x.Status.HasFlag(ModpackStatus.PreviousMod)).Count()}");
-            Console.WriteLine($"Installed Mods: {Mods.Where(x => x.Status.HasFlag(ModpackStatus.Installed)).Count()}");
-
-            var invalidIDMods = Mods.Where(x => x.ModId == 0);
-            if (invalidIDMods.Any())
-            {
-                Console.WriteLine($"\nMods with ID of 0: {invalidIDMods.Count()}\n");
-                foreach (var mod in invalidIDMods)
-                {
-                    PrintMod(mod);
-                }
-            }
-
-            var unmatchedMods = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod) && !x.Status.HasFlag(ModpackStatus.Installed));
-            if (unmatchedMods.Any())
-            {
-                Console.WriteLine($"\nCurrent Mods Which Are Not Installed: {unmatchedMods.Count()}\n");
-                foreach (var mod in unmatchedMods)
-                {
-                    PrintMod(mod);
-                }
-            }
-        }
-        public void PrintMods()
-        {
-            Console.WriteLine($"Count: {Mods.Count}");
-            foreach (ModModel mod in Mods)
-            {
-                Console.WriteLine($"Name: {mod.ModName}");
-                Console.WriteLine($"Link: {mod.ModLink}");
-                Console.WriteLine($"Id: {mod.ModId}");
-                Console.WriteLine($"Size: {mod.Size}");
-                Console.WriteLine($"Status: {mod.Status}");
-                Console.WriteLine($"Directory Present: {mod.Directory?.Exists ?? false}");
-                Console.WriteLine($"Dependencies: {String.Join(" | ", mod.Dependencies.Select(x => x.ModName))}");
-                Console.WriteLine();
-            }
-        }
-        public void PrintMod(ModModel mod)
-        {
-            Console.WriteLine($"Name: {mod.ModName}");
-            Console.WriteLine($"Link: {mod.ModLink}");
-            Console.WriteLine($"Id: {mod.ModId}");
-            Console.WriteLine($"Size: {mod.Size}");
-            Console.WriteLine($"Status: {mod.Status}");
-            Console.WriteLine($"Directory Present: {mod.Directory?.Exists ?? false}");
-            Console.WriteLine($"Dependencies: {String.Join(" | ", mod.Dependencies.Select(x => x.ModName))}");
-            Console.WriteLine();
         }
     }
 }

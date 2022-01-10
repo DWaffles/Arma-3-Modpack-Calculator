@@ -6,17 +6,17 @@ namespace ModpackCalculator
     {
         public async Task<int> ReadFromCurrentHTMLAsync(string path)
         {
-            var currentMods = await ReadFromHTMLAsync(path, ModpackStatus.CurrentMod);
-            AddReadMods(currentMods, ModpackStatus.CurrentMod);
+            var currentMods = await ReadFromHTMLAsync(path, ModStatus.CurrentMod);
+            AddReadMods(currentMods, ModStatus.CurrentMod);
             return currentMods.Count;
         }
         public async Task<int> ReadFromPreviousHTMLAsync(string path)
         {
-            var previousMods = await ReadFromHTMLAsync(path, ModpackStatus.PreviousMod);
-            AddReadMods(previousMods, ModpackStatus.PreviousMod);
+            var previousMods = await ReadFromHTMLAsync(path, ModStatus.PreviousMod);
+            AddReadMods(previousMods, ModStatus.PreviousMod);
             return previousMods.Count;
         }
-        private async Task<List<ModModel>> ReadFromHTMLAsync(string path, ModpackStatus status)
+        private async Task<List<ModModel>> ReadFromHTMLAsync(string path, ModStatus status)
         {
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
@@ -67,7 +67,7 @@ namespace ModpackCalculator
                     var returnedId = RegexHelper.GetModId(reader.ReadLine() ?? String.Empty); //get second line that has publishedid
                     if (returnedId != null)
                     {
-                        string name = reader.ReadLine() ?? string.Empty;
+                        string name = reader.ReadLine() ?? string.Empty; //meta.cpp name lines are [name = "Mod Name";]
                         if (name.StartsWith("name = ") && name.EndsWith("\";"))
                         {
                             name = name.Remove(name.Length - 2).Substring(8);
@@ -76,25 +76,22 @@ namespace ModpackCalculator
                         {
                             ModName = name,
                             ModId = returnedId.Value,
-                            Status = ModpackStatus.Installed,
+                            Status = ModStatus.Installed,
                             Directory = dir,
                         };
                         installedMods.Add(mod);
                     }
                 }
             }
-            AddReadMods(installedMods, ModpackStatus.Installed);
+            AddReadMods(installedMods, ModStatus.Installed);
             return installedMods.Count;
         }
-        public async Task<ModModel> ScrapeModDependenciesAsync(ModModel scrapeMod)
+        private async Task<ModModel> ScrapeModDependenciesAsync(ModModel scrapeMod)
         {
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             var document = await context.OpenAsync(scrapeMod.ModLink);
 
-            Console.WriteLine(scrapeMod.ModLink);
-
-            var workshopTitle = document.QuerySelectorAll(".workshopItemTitle");
             var requiredItems = document.QuerySelectorAll("#RequiredItems"); // https://stackoverflow.com/questions/32427674/how-to-extract-data-from-website-using-anglesharp-linq
 
             if (requiredItems.Any())
@@ -107,7 +104,7 @@ namespace ModpackCalculator
                         ModLink = child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty,
                         ModName = RegexHelper.StripSpecialCharacters(child.TextContent),
                         ModId = RegexHelper.GetModId(child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty) ?? 0,
-                        Status = ModpackStatus.Dependency
+                        Status = ModStatus.Dependency
                     };
                     scrapeMod.Dependencies.Add(modDependency);
                 }

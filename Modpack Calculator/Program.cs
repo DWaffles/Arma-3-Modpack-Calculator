@@ -8,12 +8,6 @@ namespace ModPackCalculator
         {
             ConsoleMenu menu = new();
             await menu.StartAsync();
-
-            Console.WriteLine("Press any key to exit.");
-            Console.ReadKey();
         }
-
     }
-
 }
-

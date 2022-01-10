@@ -5,40 +5,40 @@ namespace ModpackCalculator
 {
     internal partial class ModManager
     {
-        public void ExportAsCSV(string fileName = "output.csv")
+        public void ExportAsCSV(string fileName = "output.csv") // optional value/overload to export all/certain conditions?
         {
             if (!fileName.EndsWith(".csv"))
                 fileName += ".csv";
 
-            var carryOverMods = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod) && x.Status.HasFlag(ModpackStatus.PreviousMod)); //Carry Over Mods
-            var newMods = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod) && !x.Status.HasFlag(ModpackStatus.PreviousMod)); //New Mods
-            var removedMods = Mods.Where(x => x.Status.HasFlag(ModpackStatus.PreviousMod) && !x.Status.HasFlag(ModpackStatus.CurrentMod)); //Removed Mods
-            var unmatchedMods = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod) && !x.Status.HasFlag(ModpackStatus.Installed)); //Unmatched Mods
+            var carryOverMods = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod) && x.Status.HasFlag(ModStatus.PreviousMod)); //Carry Over Mods //includes unmatched mods! //inaccuracy
+            var newMods = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod) && !x.Status.HasFlag(ModStatus.PreviousMod)); //New Mods //includes unmatched mods! //inaccuracy
+            var removedMods = Mods.Where(x => x.Status.HasFlag(ModStatus.PreviousMod) && !x.Status.HasFlag(ModStatus.CurrentMod)); //Removed Mods //includes unmatched mods //inaccuracy?
+            var unmatchedMods = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod) && !x.Status.HasFlag(ModStatus.Installed)); //Unmatched Mods
 
             StringBuilder builder = new();
-            if (carryOverMods.Any())
+            if (carryOverMods.Any()) //includes unmatched mods! //inaccuracy
             {
                 builder.AppendLine($"Carry Over Mods ({carryOverMods.Count()}), Size [MB],Empty,Empty,Empty,Empty,Dependencies,Empty,Empty,Link,ID,Empty,Last Checked");
                 builder.AppendLine(String.Join("\n", carryOverMods.Select(x => ModExportCSV(x))));
             }
-            if (newMods.Any())
+            if (newMods.Any()) //includes unmatched mods! //inaccuracy
             {
                 if (builder.Length != 0)
-                    builder.Append("\n");
+                    builder.Append('\n');
                 builder.AppendLine($"New Mods ({newMods.Count()}), Size [MB],Empty,Empty,Empty,Empty,Dependencies,Empty,Empty,Link,ID,Empty,Last Checked");
                 builder.AppendLine(String.Join("\n", newMods.Select(x => ModExportCSV(x))));
             }
-            if (removedMods.Any())
+            if (removedMods.Any())  //includes unmatched mods //inaccuracy?
             {
                 if (builder.Length != 0)
-                    builder.Append("\n");
+                    builder.Append('\n');
                 builder.AppendLine($"Removed Mods ({removedMods.Count()}), Size [MB],Empty,Empty,Empty,Empty,Dependencies,Empty,Empty,Link,ID,Empty,Last Checked");
                 builder.AppendLine(String.Join("\n", removedMods.Select(x => ModExportCSV(x))));
             }
             if (unmatchedMods.Any())
             {
                 if (builder.Length != 0)
-                    builder.Append("\n");
+                    builder.Append('\n');
                 builder.AppendLine($"Unmatched Mods ({unmatchedMods.Count()}), Size [MB],Empty,Empty,Empty,Empty,Dependencies,Empty,Empty,Link,ID,Empty,Last Checked");
                 builder.AppendLine(String.Join("\n", unmatchedMods.Select(x => ModExportCSV(x))));
             }

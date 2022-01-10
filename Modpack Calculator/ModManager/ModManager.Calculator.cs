@@ -1,15 +1,22 @@
-﻿namespace ModpackCalculator
+﻿using ByteSizeLib;
+
+namespace ModpackCalculator
 {
     internal partial class ModManager
     {
-        public void CalculateModpackSize()
+        public double CalculateModpackSize()
         {
-            var list = Mods.Where(x => x.Status.HasFlag(ModpackStatus.CurrentMod));
+            long modpackSize = 0;
+            var list = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod));
             foreach (var mod in list)
             {
                 if (mod.Directory?.Exists ?? false)
+                {
                     mod.Size = GetDirectorySize(mod.Directory);
+                    modpackSize += mod.Size;
+                }
             }
+            return ByteSize.FromBytes(modpackSize).MegaBytes;
         }
         private long GetDirectorySize(DirectoryInfo directory)
         {

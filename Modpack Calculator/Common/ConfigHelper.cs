@@ -24,7 +24,7 @@ namespace ModpackCalculator
         }
         public static void OutputConfig(Config config = null)
         {
-            string json = JsonConvert.SerializeObject(config == null ? new Config() : config, Formatting.Indented);
+            string json = JsonConvert.SerializeObject(config ?? new Config(), Formatting.Indented);
             File.WriteAllText(ConfigName, json, new UTF8Encoding(false));
         }
     }
