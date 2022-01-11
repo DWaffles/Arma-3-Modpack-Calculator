@@ -8,7 +8,6 @@ namespace ModpackCalculator
         private ModManager ModManager { get; set; } = new();
         public async Task StartAsync()
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("Starting Arma 3 Modpack Size Calculator");
 
             Config = ConfigHelper.ReadConfig();
@@ -16,19 +15,19 @@ namespace ModpackCalculator
             if (!string.IsNullOrEmpty(Config.CurrentModpackPath))
             {
                 // Check for file existence
-                Console.WriteLine($"Automatically importing previous modpack from: {Config.CurrentModpackPath}");
+                Console.WriteLine($"\nAutomatically importing previous modpack from: {Config.CurrentModpackPath}");
                 await ModManager.ReadFromCurrentHTMLAsync(Config.CurrentModpackPath); //add confirmation
             }
             if (!string.IsNullOrEmpty(Config.PreviousModpackPath))
             {
                 // Check for file existence
-                Console.WriteLine($"Automatically importing previous modpack from: {Config.PreviousModpackPath}");
+                Console.WriteLine($"\nAutomatically importing previous modpack from: {Config.PreviousModpackPath}");
                 await ModManager.ReadFromPreviousHTMLAsync(Config.PreviousModpackPath); //add confirmation
             }
             if (!string.IsNullOrEmpty(Config.ArmaPath))
             {
                 // Check for Arma path existence
-                Console.WriteLine($"Automatically using previous Arma directory: {Config.ArmaPath}");
+                Console.WriteLine($"\nAutomatically using previous Arma directory: {Config.ArmaPath}");
                 ModManager.ReadFromInstalled(Config.ArmaPath);
             }
             await MenuDriverAsync();

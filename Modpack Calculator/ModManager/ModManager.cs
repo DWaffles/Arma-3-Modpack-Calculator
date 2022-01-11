@@ -13,7 +13,7 @@ namespace ModpackCalculator
         /// 
         /// </summary>
         /// <returns>A named tuple, the first value being the count of mods whose dependencies were populated, and the second value being the count of dependencies.</returns>
-        public async Task<(int ModsPopulated, int Dependencies)> PopulateDependenciesAsync()
+        public async Task<(int ModsPopulated, int Dependencies)> PopulateDependenciesAsync() //IProgress
         {
             var list = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod));
 

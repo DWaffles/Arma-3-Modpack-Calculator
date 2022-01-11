@@ -4,11 +4,11 @@ namespace ModpackCalculator
 {
     internal static class RegexHelper
     {
-        private static Regex RegexId { get; set; } = new Regex("[0-9]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static Regex RegexName { get; set; } = new Regex(@"\t|\n|\r", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static Regex IdRegex { get; set; } = new Regex("[0-9]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static Regex SpecialCharactersRegex { get; set; } = new Regex(@"\t|\n|\r", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static ulong? GetModId(string text)
         {
-            MatchCollection matches = RegexId.Matches(text);
+            MatchCollection matches = IdRegex.Matches(text);
             if (matches.Count > 0)
             {
                 return Convert.ToUInt64(matches[0].Value);
@@ -20,7 +20,7 @@ namespace ModpackCalculator
         }
         public static string StripSpecialCharacters(string text)
         {
-            return RegexName.Replace(text, "");
+            return SpecialCharactersRegex.Replace(text, "");
         }
     }
 }
