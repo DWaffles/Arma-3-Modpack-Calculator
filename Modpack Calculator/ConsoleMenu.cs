@@ -56,26 +56,45 @@ namespace ModpackCalculator
                 Console.WriteLine();
 
                 int count;
+                string path;
                 switch (input)
                 {
                     case "1":
                         DisplayOverview(ModManager.GetMods());
                         break;
                     case "2":
-                        //Config.CurrentModpackPath = String.Empty; // get path from user
+                        path = GetHtmlPath();  // get path from user
+
+                        if (path == null)
+                            break;
+
+                        Config.CurrentModpackPath = path;
                         ConfigHelper.OutputConfig(Config);
+
                         count = await ModManager.ReadFromCurrentHTMLAsync(Config.CurrentModpackPath);
                         Console.WriteLine($"{count} mods read from the given HTML file.");
                         break;
                     case "3":
-                        //Config.PreviousModpackPath = String.Empty; // get path from user
+                        path = GetHtmlPath();  // get path from user
+
+                        if (path == null)
+                            break;
+                        
+                        Config.PreviousModpackPath = path; 
                         ConfigHelper.OutputConfig(Config);
+
                         count = await ModManager.ReadFromPreviousHTMLAsync(Config.PreviousModpackPath);
                         Console.WriteLine($"{count} mods read from the given HTML file.");
                         break;
                     case "4":
-                        //Config.ArmaPath = String.Empty; // get path from user
+                        path = GetArmaPath(); // get path from user
+
+                        if (path == null)
+                            break;
+
+                        Config.PreviousModpackPath = path;
                         ConfigHelper.OutputConfig(Config);
+
                         count = ModManager.ReadFromInstalled(Config.ArmaPath);
                         Console.WriteLine($"{count} installed mods found and recognized.");
                         break;
@@ -104,6 +123,36 @@ namespace ModpackCalculator
                         break;
                 }
             }
+        }
+        private static string GetHtmlPath()
+        {
+            Console.Write("Drag pack HTML: ");
+            string path = Console.ReadLine().Replace("\"", "");
+
+            FileInfo fileInfo = new FileInfo(path);
+            if (fileInfo.Exists)
+            {
+                if (String.Equals(fileInfo.Extension, ".html", StringComparison.OrdinalIgnoreCase))
+                {
+                    return path;
+                }
+                else
+                {
+                    Console.WriteLine($"{fileInfo.Name} does not have an .html extension, returning to menu selection.");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Given path is not a valid file, returning to menu selection.");
+                return null;
+            }
+        }
+        private static string GetArmaPath() //do proper checking
+        {
+            Console.Write("Enter path to Arma 3 installation: ");
+            string path = Console.ReadLine().Replace("\"", "");
+            return path;
         }
         private void DisplayOverview(IEnumerable<ModModel> mods)
         {
@@ -216,17 +265,6 @@ namespace ModpackCalculator
                 }
             }
         }
-
-        // Old Testing Methods
-        public async Task TestAsync()
-        {
-            //var num3 = ModManager.ReadFromPreviousHTMLAsync();
-            await ModManager.PopulateDependenciesAsync();
-            ModManager.CalculateModpackSize();
-            //ModManager.PrintModOverview();
-            Console.WriteLine("Exporting");
-            ModManager.ExportAsCSV();
-            Console.WriteLine("Exported");
-        }
+        
     }
 }

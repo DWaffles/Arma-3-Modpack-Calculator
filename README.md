@@ -11,3 +11,4 @@ While unfinished with user interface, the core logic is mostly completed with on
 - [AngleSharp](https://anglesharp.github.io/)
 - [ByteSize](https://github.com/omar/ByteSize)
 - [Newtonsoft.Json](https://www.newtonsoft.com/json)
+- [Stack Overflow](https://stackoverflow.com/)
