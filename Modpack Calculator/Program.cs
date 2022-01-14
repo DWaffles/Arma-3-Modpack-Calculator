@@ -1,4 +1,5 @@
 ﻿using ModpackCalculator;
+using ModpackCalculator.SpectreMenu;
 using Spectre.Console;
 
 namespace ModPackCalculator
@@ -19,13 +20,14 @@ namespace ModPackCalculator
             {
                 case "Spectre.Console":
                     SpectreMenu spectreMenu = new();
-                    spectreMenu.Start();
+                    await spectreMenu.StartAsync();
                     break;
                 case "System Console":
                     ConsoleMenu consoleMenu = new();
                     await consoleMenu.StartAsync();
                     break;
                 default:
+                    Console.ReadKey();
                     return;
             }
             _ = Main(args);

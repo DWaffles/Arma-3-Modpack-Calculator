@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using ModpackCalculator.SpectreMenu;
+using System.Collections.ObjectModel;
 
 namespace ModpackCalculator
 {
@@ -9,21 +10,7 @@ namespace ModpackCalculator
         {
             return Mods.AsReadOnly();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>A named tuple, the first value being the count of mods whose dependencies were populated, and the second value being the count of dependencies.</returns>
-        public async Task<(int ModsPopulated, int Dependencies)> PopulateDependenciesAsync() //IProgress
-        {
-            var list = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod));
-
-            var tasks = list.Select(async mod =>
-            {
-                var response = await ScrapeModDependenciesAsync(mod);
-            });
-            await Task.WhenAll(tasks);
-            return (list.Count(), list.Sum(x => x.Dependencies.Count));
-        }
+        
         private void AddReadMods(IEnumerable<ModModel> mods, ModStatus status)
         {
             foreach (var mod in mods)
@@ -51,10 +38,6 @@ namespace ModpackCalculator
                     foundMod.UpdateValues(mod, status);
                 }
             }
-        }
-        private string GetWorkshopPath(string path)
-        {
-            return Path.Combine(path, "!Workshop");
         }
     }
 }

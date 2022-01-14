@@ -6,16 +6,18 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModpackCalculator
+namespace ModpackCalculator.SpectreMenu
 {
     internal partial class SpectreMenu
     {
+        [InterfaceOption("Menu Options", "Clear Console")]
         private bool ClearConsole()
         {
             Console.Clear();
             AnsiConsole.Write(new Rule("[underline darkorange]Arma 3 Modpack Size Calculator[/]").LeftAligned().RuleStyle(Style.Parse("darkorange")));
             return true;
         }
+        [InterfaceOption("Menu Options", "Quit Menu")]
         private bool QuitProgram()
         {
             Console.Clear();

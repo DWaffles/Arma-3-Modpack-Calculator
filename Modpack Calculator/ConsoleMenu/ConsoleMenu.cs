@@ -2,6 +2,7 @@
 
 namespace ModpackCalculator
 {
+    [Obsolete]
     internal class ConsoleMenu
     {
         private Config Config { get; set; } = new();
@@ -94,12 +95,12 @@ namespace ModpackCalculator
                         Config.PreviousModpackPath = path;
                         ConfigHelper.OutputConfig(Config);
 
-                        count = ModManager.ReadFromInstalled(Config.ArmaPath);
+                        count = ModManager.ReadFromInstalled(GetWorkshopPath(Config.ArmaPath));
                         Console.WriteLine($"{count} installed mods found and recognized.");
                         break;
                     case "5":
                         Console.WriteLine("Populating dependencies...");
-                        var (ModsPopulated, Dependencies) = await ModManager.PopulateDependenciesAsync();
+                        var (ModsPopulated, Dependencies) = await ModManager.CalculateDependenciesAsync();
                         Console.WriteLine($"{Dependencies} dependencies added for {ModsPopulated} mods.");
                         break;
                     case "6":
@@ -128,7 +129,7 @@ namespace ModpackCalculator
             Console.Write("Drag pack HTML: ");
             string path = Console.ReadLine().Replace("\"", "");
 
-            FileInfo fileInfo = new FileInfo(path);
+            FileInfo fileInfo = new(path);
             if (fileInfo.Exists)
             {
                 if (String.Equals(fileInfo.Extension, ".html", StringComparison.OrdinalIgnoreCase))
@@ -153,7 +154,11 @@ namespace ModpackCalculator
             string path = Console.ReadLine().Replace("\"", "");
             return path;
         }
-        private void DisplayOverview(IEnumerable<ModModel> mods)
+        private static string GetWorkshopPath(string path)
+        {
+            return Path.Combine(path, "!Workshop");
+        }
+        private static void DisplayOverview(IEnumerable<ModModel> mods)
         {
             int textPad = 40;
             int intPad = 10;
@@ -257,7 +262,7 @@ namespace ModpackCalculator
                 {
                     Console.Write(string.Concat(mod.ModName.PadRight(textPad).AsSpan(0, textPad), " | "));
                     Console.Write(mod.ModId.ToString().PadRight(intPad) + " | ");
-                    Console.Write(string.Concat(ByteSize.FromBytes(mod.Size).MegaBytes.ToString().PadRight(intPad).AsSpan(0, intPad), " | "));
+                    Console.Write(string.Concat(ByteSize.FromBytes(mod.Bytes).MegaBytes.ToString().PadRight(intPad).AsSpan(0, intPad), " | "));
                     Console.Write(string.Concat($"[{mod.Dependencies.Count}] {String.Join(", ", mod.Dependencies.Select(x => x.ModName))}".PadRight(textPad).AsSpan(0, textPad), " | "));
                     Console.Write(mod.ModLink);
                     Console.WriteLine();

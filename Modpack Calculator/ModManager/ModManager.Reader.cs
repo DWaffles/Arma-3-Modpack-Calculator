@@ -50,11 +50,10 @@ namespace ModpackCalculator
         public int ReadFromInstalled(string path)
         {
             List<ModModel> installedMods = new();
-
-            DirectoryInfo armaDir = new(GetWorkshopPath(path));
+            DirectoryInfo armaDir = new(path);
 
             if (!armaDir.Exists)
-                throw new DirectoryNotFoundException($"{GetWorkshopPath(path)} cannot be found.");
+                throw new DirectoryNotFoundException($"{path} cannot be found.");
 
             foreach (var dir in armaDir.GetDirectories())
             {
@@ -99,14 +98,19 @@ namespace ModpackCalculator
                 var page = requiredItems.ElementAt(0);
                 foreach (var child in page.Children)
                 {
-                    ModModel modDependency = new()
+                    var modId = RegexHelper.GetModId(child.GetAttribute("Href") ?? String.Empty);
+                    var modName = RegexHelper.StripSpecialCharacters(child.TextContent);
+                    if (!scrapeMod.Dependencies.Where(x => x.ModId == modId || x.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase)).Any())
                     {
-                        ModLink = child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty,
-                        ModName = RegexHelper.StripSpecialCharacters(child.TextContent),
-                        ModId = RegexHelper.GetModId(child.HasAttribute("Href") ? child.GetAttribute("Href") ?? String.Empty : String.Empty) ?? 0,
-                        Status = ModStatus.Dependency
-                    };
-                    scrapeMod.Dependencies.Add(modDependency);
+                        ModModel modDependency = new()
+                        {
+                            ModLink = child.GetAttribute("Href") ?? String.Empty,
+                            ModName = modName,
+                            ModId = modId ?? 0,
+                            Status = ModStatus.Dependency
+                        };
+                        scrapeMod.Dependencies.Add(modDependency);
+                    }
                 }
             }
             return scrapeMod;

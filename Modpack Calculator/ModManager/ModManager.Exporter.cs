@@ -50,7 +50,7 @@ namespace ModpackCalculator
 
             List<string> list = new();
             list.Add(EscapeCSVString(mod.ModName)); // Title
-            list.Add(ByteSize.FromBytes(mod.Size).MegaBytes.ToString()); // Size
+            list.Add(ByteSize.FromBytes(mod.Bytes).MegaBytes.ToString()); // Size
             list.Add(String.Empty); //EMPTY
             list.Add(String.Empty); //EMPTY
             list.Add(String.Empty); //EMPTY
