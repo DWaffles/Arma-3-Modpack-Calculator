@@ -101,7 +101,7 @@ namespace ModpackCalculator
         {
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
-            var document = await context.OpenAsync(scrapeMod.ModLink);
+            var document = await context.OpenAsync(scrapeMod.ModLink!);
 
             var requiredItems = document.QuerySelectorAll("#RequiredItems"); // https://stackoverflow.com/questions/32427674/how-to-extract-data-from-website-using-anglesharp-linq
 

@@ -109,7 +109,7 @@ namespace ModpackCalculator
                         Console.WriteLine($"Modpack size from matched mods: {size.byteSize.MegaBytes} MB");
                         break;
                     case "7":
-                        ModManager.ExportAsCSV();
+                        ModManager.ExportAsFormattedCSV();
                         break;
                     case "Q":
                         display = false;

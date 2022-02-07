@@ -12,7 +12,7 @@ namespace ModpackCalculator.SpectreMenu
         [InterfaceChoice(ChoiceGroups.ExportGroup, "Export to CSV")]
         public void ExportToCSV()
         {
-            ModManager.ExportAsCSV();
+            ModManager.ExportAsFormattedCSV();
         }
     }
 }
