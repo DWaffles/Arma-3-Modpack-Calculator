@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Spectre.Console;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,10 @@ namespace ModpackCalculator.SpectreMenu
 {
     internal partial class SpectreMenu
     {
-        [InterfaceOption("Export Options", "Export to CSV")]
+        [InterfaceChoice(ChoiceGroups.ExportGroup, "Export to CSV")]
         public void ExportToCSV()
         {
-
+            ModManager.ExportAsCSV();
         }
     }
 }

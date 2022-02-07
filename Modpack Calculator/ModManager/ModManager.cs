@@ -11,24 +11,11 @@ namespace ModpackCalculator
             return Mods.AsReadOnly();
         }
         
-        private void AddReadMods(IEnumerable<ModModel> mods, ModStatus status)
+        private void AddMods(IEnumerable<ModModel> mods, ModStatus status)
         {
             foreach (var mod in mods)
             {
-                ModModel foundMod;
-                if (mod.ModId == 0)
-                {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    foundMod = Mods.SingleOrDefault(m => m.ModName.Equals(mod.ModName, StringComparison.OrdinalIgnoreCase));
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-                }
-                else
-                {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    foundMod = Mods.SingleOrDefault(m => m.ModId == mod.ModId ||
-                                        m.ModName.Equals(mod.ModName, StringComparison.OrdinalIgnoreCase));
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-                }
+                ModModel? foundMod = Mods.SingleOrDefault(m => m.Equals(mod));
                 if (foundMod == null)
                 {
                     Mods.Add(mod);

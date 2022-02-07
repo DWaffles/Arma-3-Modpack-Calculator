@@ -95,7 +95,7 @@ namespace ModpackCalculator
                         Config.PreviousModpackPath = path;
                         ConfigHelper.OutputConfig(Config);
 
-                        count = ModManager.ReadFromInstalled(GetWorkshopPath(Config.ArmaPath));
+                        count = ModManager.ReadFromInstalled(Config.ArmaPath);
                         Console.WriteLine($"{count} installed mods found and recognized.");
                         break;
                     case "5":
@@ -106,7 +106,7 @@ namespace ModpackCalculator
                     case "6":
                         Console.WriteLine("Calculating modpack size...");
                         var size = ModManager.CalculateModpackSize();
-                        Console.WriteLine($"Modpack size from matched mods: {size} MB");
+                        Console.WriteLine($"Modpack size from matched mods: {size.byteSize.MegaBytes} MB");
                         break;
                     case "7":
                         ModManager.ExportAsCSV();

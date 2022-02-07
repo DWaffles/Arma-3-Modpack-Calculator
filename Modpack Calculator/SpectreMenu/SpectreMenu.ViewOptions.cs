@@ -10,7 +10,7 @@ namespace ModpackCalculator.SpectreMenu
 {
     internal partial class SpectreMenu
     {
-        [InterfaceOption("View Options", "Toggle Overview")]
+        [InterfaceChoice(ChoiceGroups.View, "Toggle Overview")]
         private void ToggleOverview()
         {
             DisplayOverview = !DisplayOverview;
@@ -57,7 +57,7 @@ namespace ModpackCalculator.SpectreMenu
 
             AnsiConsole.Write(tree);
         }
-        [InterfaceOption("View Options", "List Mods")]
+        [InterfaceChoice(ChoiceGroups.View, "List Mods")]
         private void ListMods()
         {
             var mods = ModManager.GetMods();
@@ -76,11 +76,10 @@ namespace ModpackCalculator.SpectreMenu
 
             Table table;
 
-            //ID Zero Mods
-            //Name //Folder
-            if (invalidIDMods.Any())
+            PrintOverview();
+            if (invalidIDMods.Any()) //ID Zero Mods
             {
-                table = new Table()
+                table = new Table() //Name //Folder
                     .Border(TableBorder.MinimalHeavyHead);
                 table.AddColumns($"[yellow]Installed Mods with ID of Zero[/] ({invalidIDMods.Count()})", "[yellow]Folder Name[/]");
                 foreach (var mod in invalidIDMods.OrderBy(x => x.ModName))
@@ -89,12 +88,10 @@ namespace ModpackCalculator.SpectreMenu
                 }
                 AnsiConsole.Write(table);
             }
-
-            //Not Matched Mods
-            //Name //ID //Link// Dependencies?
-            if (unmatchedMods.Any())
+            
+            if (unmatchedMods.Any()) //Not Matched Mods
             {
-                table = new Table()
+                table = new Table() //Name //ID //Dependencies //Link
                     .Border(TableBorder.MinimalHeavyHead);
                 table.AddColumns($"[yellow]Mods Not Matched[/] ({unmatchedMods.Count()})", "[yellow]ID[/]", "[yellow]Dependencies[/]", "[yellow]Link[/]");
                 foreach (var mod in unmatchedMods.OrderBy(x => x.ModName))
@@ -105,14 +102,12 @@ namespace ModpackCalculator.SpectreMenu
                 AnsiConsole.Write(table);
             }
 
-            //Matched Mods
-            //Name //ID // Size // Dependencies //Link
-            if(matchedMods.Any())
+            if(matchedMods.Any()) //Matched Mods
             {
-                table = new Table()
+                table = new Table() //Name //ID // Size // Dependencies //Link
                     .Border(TableBorder.MinimalHeavyHead);
                 var dependencyCount = matchedMods.Sum(x => x.Dependencies.Count());
-                table.AddColumns($"[yellow]Matched Mods[/] ({matchedMods.Count()})", "[yellow]ID[/]", "[yellow]Size[/]", $"[yellow]Dependencies ({dependencyCount})[/]", "[yellow]Link[/]");
+                table.AddColumns($"[yellow]Matched Mods[/] ({matchedMods.Count()})", "[yellow]ID[/]", "[yellow]Size [[MB]][/]", $"[yellow]Dependencies ({dependencyCount})[/]", "[yellow]Link[/]");
                 foreach (var mod in matchedMods.OrderBy(x => x.ModName))
                 {
                     string dependencies = string.Concat($"({mod.Dependencies.Count}) {String.Join(", ", mod.Dependencies.Select(x => x.ModName))}");
@@ -120,10 +115,15 @@ namespace ModpackCalculator.SpectreMenu
                 }
                 AnsiConsole.Write(table);
             }
+
+            AnsiConsole.Confirm("Continue?");
+            ClearConsole();
         }
-        [InterfaceOption("View Options", "View Paths")]
+        [InterfaceChoice(ChoiceGroups.View, "View Paths")]
         private void ViewPaths()
         {
+            AnsiConsole.MarkupLine("[yellow]Current Modpack Path:[/] ");
+            AnsiConsole.MarkupLine("[yellow]Current Modpack Path: ");
         }
     }
 }

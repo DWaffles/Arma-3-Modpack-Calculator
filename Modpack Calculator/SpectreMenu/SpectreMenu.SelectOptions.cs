@@ -10,7 +10,7 @@ namespace ModpackCalculator.SpectreMenu
 {
     internal partial class SpectreMenu
     {
-        [InterfaceOption("Select Options", "Select Current Modpack HTML")]
+        [InterfaceChoice(ChoiceGroups.SelectGroup, "Select Current Modpack HTML")]
         private async Task<bool> SelectCurrentPackAsync()
         {
             FileInfo? file = null;
@@ -26,12 +26,13 @@ namespace ModpackCalculator.SpectreMenu
             {
                 Config.CurrentModpackPath = file.FullName;
                 await ModManager.ReadFromCurrentHTMLAsync(Config.CurrentModpackPath);
+                ConfigHelper.OutputConfig(Config);
                 return true;
             }
             else
                 return false;
         }
-        [InterfaceOption("Select Options", "Select Previous Modpack HTML")]
+        [InterfaceChoice(ChoiceGroups.SelectGroup, "Select Previous Modpack HTML")]
         private async Task<bool> SelectPreviousPackAsync()
         {
             FileInfo? file = null;
@@ -48,12 +49,13 @@ namespace ModpackCalculator.SpectreMenu
             {
                 Config.PreviousModpackPath = file.FullName;
                 await ModManager.ReadFromPreviousHTMLAsync(Config.PreviousModpackPath);
+                ConfigHelper.OutputConfig(Config);
                 return true;
             }
             else
                 return false;
         }
-        [InterfaceOption("Select Options", "Select Arma Directory")]
+        [InterfaceChoice(ChoiceGroups.SelectGroup, "Select Arma Directory")]
         private bool SelectDirectory()
         {
             DirectoryInfo? directory = null;
@@ -70,6 +72,7 @@ namespace ModpackCalculator.SpectreMenu
             {
                 Config.ArmaPath = directory.FullName;
                 ModManager.ReadFromInstalled(Config.ArmaPath);
+                ConfigHelper.OutputConfig(Config);
                 return true;
             }
             else
@@ -105,8 +108,7 @@ namespace ModpackCalculator.SpectreMenu
             directory = new(path.Replace("\"", ""));
             if (directory.Exists)
             {
-                directory = new(Path.Combine(path, "!Workshop"));
-                if (directory.Exists)
+                if (new DirectoryInfo(Path.Combine(path, "!Workshop")).Exists)
                 {
                     return ValidationResult.Success();
                 }

@@ -30,7 +30,7 @@ namespace ModpackCalculator
 
             return (list.Count(), list.Sum(x => x.Dependencies.Count));
         }
-        public double CalculateModpackSize() //return num mods calculated
+        public (int count, ByteSize byteSize) CalculateModpackSize() //return num mods calculated
         {
             long modpackSize = 0;
             var list = Mods.Where(x => x.Status.HasFlag(ModStatus.CurrentMod));
@@ -42,22 +42,20 @@ namespace ModpackCalculator
                     modpackSize += mod.Bytes;
                 }
             }
-            return ByteSize.FromBytes(modpackSize).MegaBytes;
+            return (list.Count(x => x.Directory?.Exists ?? false), ByteSize.FromBytes(modpackSize));
         }
         private long GetDirectorySize(DirectoryInfo directory)
         {
             long size = 0;
 
-            // Add file sizes.
             FileInfo[] fis = directory.GetFiles();
-            foreach (FileInfo fi in fis)
+            foreach (FileInfo fi in fis) // Add file sizes.
             {
                 size += fi.Length;
             }
-
-            // Add subdirectory sizes.
+            
             DirectoryInfo[] dis = directory.GetDirectories();
-            foreach (DirectoryInfo di in dis)
+            foreach (DirectoryInfo di in dis) // Add subdirectory sizes.
             {
                 size += GetDirectorySize(di);
             }

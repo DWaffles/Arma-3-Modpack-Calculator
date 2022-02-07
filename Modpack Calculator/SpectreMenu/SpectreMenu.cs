@@ -17,12 +17,12 @@ namespace ModpackCalculator.SpectreMenu
         private ModManager ModManager { get; set; } = new();
         public async Task StartAsync()
         {
-            Config = ConfigHelper.ReadConfig();
-            ClearConsole();
-            await ConfigPromptsAsync();
-
             try
             {
+                Config = ConfigHelper.ReadConfig();
+                ClearConsole();
+                await ConfigPromptsAsync();
+
                 await MenuDriver();
             }
             catch (Exception ex)
@@ -36,7 +36,6 @@ namespace ModpackCalculator.SpectreMenu
 
             while (DisplayMenu)
             {
-                //ClearConsole();
                 if (DisplayOverview)
                 {
                     AnsiConsole.WriteLine();
@@ -48,7 +47,7 @@ namespace ModpackCalculator.SpectreMenu
                     .PageSize(20)
                     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]");
 
-                foreach (var kvp in choiceGroups)
+                foreach (var kvp in choiceGroups.OrderBy(x => ChoiceGroups.GetGroupPriority(x.Key)))
                 {
                     prompt.AddChoiceGroup(kvp.Key, kvp.Value.Select(x => x.Key));
                 }
@@ -72,9 +71,9 @@ namespace ModpackCalculator.SpectreMenu
         private static Dictionary<string, Dictionary<string, MethodInfo>> GetInterfaceOptions()
         {
             Dictionary<string, Dictionary<string, MethodInfo>> dictionary = new();
-            foreach(var option in typeof(SpectreMenu).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+            foreach(var option in typeof(SpectreMenu).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
             {
-                var attribute = (InterfaceOptionAttribute? )option.GetCustomAttribute(typeof(InterfaceOptionAttribute));
+                var attribute = (InterfaceChoiceAttribute?) option.GetCustomAttribute(typeof(InterfaceChoiceAttribute));
                 if(attribute != null)
                 {
                     if (dictionary.ContainsKey(attribute.ChoiceGroup))
@@ -104,7 +103,7 @@ namespace ModpackCalculator.SpectreMenu
                     new SelectionPrompt<string>()
                         .Title($"Found previous modpack path: {Config.PreviousModpackPath}")
                         .PageSize(10)
-                        .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
+                        .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
                         .AddChoices(new[] {
                             "Use as Previous Modpack Path",
                             "Use as Current Modpack Path",
@@ -137,11 +136,17 @@ namespace ModpackCalculator.SpectreMenu
         {
             if (Config.CurrentModpackPath != null && new FileInfo(Config.CurrentModpackPath).Exists)
             {
+                List<string> choices = new() { "Use as Current Modpack Path", "Discard" };
+                if (Config.PreviousModpackPath == null)
+                {
+                    choices.Add(choices[1]);
+                    choices[1] = "Use as Previous Modpack Path";
+                }
                 var input = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title($"Found current modpack path: {Config.CurrentModpackPath}")
                         .PageSize(10)
-                        .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
+                        .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
                         .AddChoices(new[] {
                             "Use as Current Modpack Path",
                             "Discard",
@@ -150,6 +155,11 @@ namespace ModpackCalculator.SpectreMenu
                 {
                     case "Use as Current Modpack Path":
                         await ModManager.ReadFromCurrentHTMLAsync(Config.CurrentModpackPath);
+                        break;
+                    case "Use as Previous Modpack Path":
+                        Config.CurrentModpackPath = Config.CurrentModpackPath;
+                        Config.PreviousModpackPath = null;
+                        await ModManager.ReadFromPreviousHTMLAsync(Config.CurrentModpackPath);
                         break;
                     case "Discard":
                         Config.CurrentModpackPath = null;
@@ -167,9 +177,9 @@ namespace ModpackCalculator.SpectreMenu
             {
                 var input = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                        .Title($"Found Arma 3 workshop path: {Config.CurrentModpackPath}")
+                        .Title($"Found previously used Arma 3 directory: {Config.ArmaPath}")
                         .PageSize(10)
-                        .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
+                        .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
                         .AddChoices(new[] {
                             "Use as Arma 3 workshop path",
                             "Discard",

@@ -10,7 +10,7 @@ namespace ModpackCalculator.SpectreMenu
 {
     internal partial class SpectreMenu
     {
-        [InterfaceOption("Calculation Options", "Calculate Dependencies")]
+        [InterfaceChoice(ChoiceGroups.CalculateGroup, "Calculate Dependencies")]
         private async Task CalculateDependenciesAsync()
         {
             int modsPopulated = 0, totalDependencies = 0;
@@ -31,11 +31,17 @@ namespace ModpackCalculator.SpectreMenu
 
             AnsiConsole.MarkupLine($"{totalDependencies} dependencies were added for {modsPopulated} mods.");
         }
-        [InterfaceOption("Calculation Options", "Calculate Size")]
+        [InterfaceChoice(ChoiceGroups.CalculateGroup, "Calculate Size")]
         private void CalculateSize()
         {
-            var size = ModManager.CalculateModpackSize();
-            AnsiConsole.MarkupLine($"Calculated current modpack size with [green]-[/] matched mods ([red]-[/] unmatched) at [green]{size}[/] MB.");
+            var (count, size) = ModManager.CalculateModpackSize();
+            //AnsiConsole.MarkupLine($"Calculated current modpack size with [green]{count}[/] matched mods ([red]-[/] unmatched) at [green]{size.MegaBytes}[/] MB.");
+
+            var tree = new Tree($"[yellow]Calculated Mods[/]: {count}");
+            tree.AddNode($"GB: {size.GigaBytes.ToString("##,00.00")}");
+            tree.AddNode($"MB: {size.MegaBytes.ToString("##,00.00")}");
+            tree.AddNode($"B:  {size.Bytes.ToString("##,00.00")}");
+            AnsiConsole.Write(tree);
         }
     }
 }
