@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Spectre.Console;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-using Spectre.Console;
 
 namespace ModpackCalculator.SpectreMenu
 {
@@ -60,7 +54,7 @@ namespace ModpackCalculator.SpectreMenu
                     {
                         ClearConsole();
                         var result = choiceGroup[input].Invoke(this, null);
-                        if(result != null && result is Task task)
+                        if (result != null && result is Task task)
                         {
                             await task;
                         }
@@ -71,10 +65,10 @@ namespace ModpackCalculator.SpectreMenu
         private static Dictionary<string, Dictionary<string, MethodInfo>> GetInterfaceOptions()
         {
             Dictionary<string, Dictionary<string, MethodInfo>> dictionary = new();
-            foreach(var option in typeof(SpectreMenu).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            foreach (var option in typeof(SpectreMenu).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
             {
-                var attribute = (InterfaceChoiceAttribute?) option.GetCustomAttribute(typeof(InterfaceChoiceAttribute));
-                if(attribute != null)
+                var attribute = (InterfaceChoiceAttribute?)option.GetCustomAttribute(typeof(InterfaceChoiceAttribute));
+                if (attribute != null)
                 {
                     if (dictionary.ContainsKey(attribute.ChoiceGroup))
                         dictionary[attribute.ChoiceGroup].Add(attribute.ChoiceName, option);

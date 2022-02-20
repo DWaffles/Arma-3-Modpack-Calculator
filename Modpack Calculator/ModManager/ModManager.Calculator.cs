@@ -53,7 +53,7 @@ namespace ModpackCalculator
             {
                 size += fi.Length;
             }
-            
+
             DirectoryInfo[] dis = directory.GetDirectories();
             foreach (DirectoryInfo di in dis) // Add subdirectory sizes.
             {

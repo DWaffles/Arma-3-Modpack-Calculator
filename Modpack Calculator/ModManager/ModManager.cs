@@ -1,5 +1,4 @@
-﻿using ModpackCalculator.SpectreMenu;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace ModpackCalculator
 {
@@ -10,7 +9,7 @@ namespace ModpackCalculator
         {
             return Mods.AsReadOnly();
         }
-        
+
         private void AddMods(IEnumerable<ModModel> mods, ModStatus status)
         {
             foreach (var mod in mods)

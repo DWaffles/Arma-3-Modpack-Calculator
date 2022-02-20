@@ -1,10 +1,4 @@
 ﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModpackCalculator.SpectreMenu
 {
@@ -32,13 +26,13 @@ namespace ModpackCalculator.SpectreMenu
             var tree = new Tree($"[yellow]All Mods[/]: {mods.Count}");
 
             var current = tree.AddNode($"[yellow]Current Mods[/]: {currentMods.Count()}");
-            if(carryOverMods.Any())
+            if (carryOverMods.Any())
             {
                 var carryOver = current.AddNode($"[yellow]Carry Over Mods[/]: {carryOverMods.Count()}");
                 carryOver.AddNode($"[green]Matched[/]: {carryOverMods.Intersect(installedMods).Count()}");
                 carryOver.AddNode($"[red]Not Matched[/]: {carryOverMods.Where(x => !x.Status.HasFlag(ModStatus.Installed)).Count()}");
             }
-            if(addedMods.Any())
+            if (addedMods.Any())
             {
                 var added = current.AddNode($"[yellow]Added Mods[/]: {addedMods.Count()}");
                 added.AddNode($"[green]Matched[/]: {addedMods.Intersect(installedMods).Count()}");
@@ -50,7 +44,7 @@ namespace ModpackCalculator.SpectreMenu
             tree.AddNode($"[yellow]Previous Mods[/]: {previousMods.Count()}");
 
             var installed = tree.AddNode($"[yellow]Installed Mods[/]: {installedMods.Count()}");
-            if(invalidIDMods.Any())
+            if (invalidIDMods.Any())
             {
                 installed.AddNode($"[red]Invalid ID Mods[/]: {invalidIDMods.Count()}");
             }
@@ -88,7 +82,7 @@ namespace ModpackCalculator.SpectreMenu
                 }
                 AnsiConsole.Write(table);
             }
-            
+
             if (unmatchedMods.Any()) //Not Matched Mods
             {
                 table = new Table() //Name //ID //Dependencies //Link
@@ -102,11 +96,11 @@ namespace ModpackCalculator.SpectreMenu
                 AnsiConsole.Write(table);
             }
 
-            if(matchedMods.Any()) //Matched Mods
+            if (matchedMods.Any()) //Matched Mods
             {
                 table = new Table() //Name //ID // Size // Dependencies //Link
                     .Border(TableBorder.MinimalHeavyHead);
-                var dependencyCount = matchedMods.Sum(x => x.Dependencies.Count());
+                var dependencyCount = matchedMods.Sum(x => x.Dependencies.Count);
                 table.AddColumns($"[yellow]Matched Mods[/] ({matchedMods.Count()})", "[yellow]ID[/]", "[yellow]Size [[MB]][/]", $"[yellow]Dependencies ({dependencyCount})[/]", "[yellow]Link[/]");
                 foreach (var mod in matchedMods.OrderBy(x => x.ModName))
                 {
@@ -122,8 +116,9 @@ namespace ModpackCalculator.SpectreMenu
         [InterfaceChoice(ChoiceGroups.View, "View Paths")]
         private void ViewPaths()
         {
-            AnsiConsole.MarkupLine("[yellow]Current Modpack Path:[/] ");
-            AnsiConsole.MarkupLine("[yellow]Current Modpack Path: ");
+            AnsiConsole.MarkupLine($"[yellow]Current Modpack Path:[/] {Config.CurrentModpackPath}");
+            AnsiConsole.MarkupLine($"[yellow]Previous Modpack Path:[/] {Config.PreviousModpackPath}");
+            AnsiConsole.MarkupLine($"[yellow]Arma Path:[/] {Config.ArmaPath}");
         }
     }
 }

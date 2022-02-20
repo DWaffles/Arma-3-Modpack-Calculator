@@ -6,12 +6,14 @@ namespace ModpackCalculator
     {
         public async Task<int> ReadFromCurrentHTMLAsync(string path)
         {
+            // Clear current mods first
             var currentMods = await ReadFromHTMLAsync(path, ModStatus.CurrentMod);
             AddMods(currentMods, ModStatus.CurrentMod);
             return currentMods.Count;
         }
         public async Task<int> ReadFromPreviousHTMLAsync(string path)
         {
+            // Clear previous mods first
             var previousMods = await ReadFromHTMLAsync(path, ModStatus.PreviousMod);
             AddMods(previousMods, ModStatus.PreviousMod);
             return previousMods.Count;
@@ -38,8 +40,8 @@ namespace ModpackCalculator
                     ModModel mod = new()
                     {
                         ModName = name,
-                        ModLink = RegexHelper.StripSpecialCharacters(modLink).Trim(),
-                        ModId = RegexHelper.GetModId(modLink) ?? 0,
+                        ModLink = modLink.StripSpecialCharacters().Trim(),
+                        ModId = modLink.GetModId() ?? 0,
                         Status = status,
                     };
                     readMods.Add(mod);
@@ -65,7 +67,7 @@ namespace ModpackCalculator
                     using var reader = new StreamReader(filePath);
                     reader.ReadLine(); // disregarding first line
 
-                    var returnedId = RegexHelper.GetModId(reader.ReadLine() ?? String.Empty); //get second line that has publishedid
+                    var returnedId = (reader.ReadLine() ?? String.Empty).GetModId(); //get second line that has publishedid
                     if (returnedId != null)
                     {
                         string name = reader.ReadLine() ?? string.Empty; //meta.cpp name lines are [name = "Mod Name";]
@@ -110,9 +112,9 @@ namespace ModpackCalculator
                 var page = requiredItems.ElementAt(0);
                 foreach (var child in page.Children)
                 {
-                    var modId = RegexHelper.GetModId(child.GetAttribute("Href") ?? String.Empty);
-                    var modName = RegexHelper.StripSpecialCharacters(child.TextContent);
-                    if (!scrapeMod.Dependencies.Where(x => x.ModId == modId || x.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase)).Any())
+                    var modId = (child.GetAttribute("Href") ?? String.Empty).GetModId();
+                    var modName = child.TextContent.StripSpecialCharacters();
+                    if (!scrapeMod.Dependencies.Where(x => x.ModId == modId || x.ModName!.Equals(modName, StringComparison.OrdinalIgnoreCase)).Any())
                     {
                         ModModel modDependency = new()
                         {

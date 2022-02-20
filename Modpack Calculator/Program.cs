@@ -16,7 +16,7 @@ namespace ModPackCalculator
                     .AddChoices(new[] {
                         "Spectre.Console", "System Console", "Quit"
                     }));
-            switch(selection)
+            switch (selection)
             {
                 case "Spectre.Console":
                     SpectreMenu spectreMenu = new();

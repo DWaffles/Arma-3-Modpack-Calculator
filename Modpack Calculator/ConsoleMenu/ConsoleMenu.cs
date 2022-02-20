@@ -79,8 +79,8 @@ namespace ModpackCalculator
 
                         if (path == null)
                             break;
-                        
-                        Config.PreviousModpackPath = path; 
+
+                        Config.PreviousModpackPath = path;
                         ConfigHelper.OutputConfig(Config);
 
                         count = await ModManager.ReadFromPreviousHTMLAsync(Config.PreviousModpackPath);
@@ -269,6 +269,5 @@ namespace ModpackCalculator
                 }
             }
         }
-        
     }
 }
